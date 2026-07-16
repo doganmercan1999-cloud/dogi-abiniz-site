@@ -1,4 +1,4 @@
-# Dogi Abiniz – Next.js V7
+# Dogi Abiniz – Next.js V8
 
 ## Özellikler
 
@@ -67,4 +67,8 @@ sosyal bağlantılar ve YouTube bölümü çalışmaya devam eder.
 - YouTube video kartları
 - Kanal istatistik kartları
 - Geniş ekran ve mobil uyumluluk
-Vercel Next.js deployment yenilemesi.
+
+
+## V8
+- YouTube istatistikleri canlı yayın panelinden kaldırıldı.
+- Abone, izlenme ve video sayısı Son Videolar bölümünün altına taşındı.

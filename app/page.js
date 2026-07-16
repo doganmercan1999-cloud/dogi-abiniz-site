@@ -192,28 +192,6 @@ export default function Home() {
               )}
             </div>
 
-            <div className="statsGrid">
-              {youtubeStats.map((stat, index) => (
-                <div className="statCard" key={stat.label}>
-                  <span className={`statIcon icon${index}`}>{stat.icon}</span>
-                  <div>
-                    <small>{stat.label}</small>
-                    <b>{stat.value}</b>
-                    <em>{stat.sub}</em>
-                  </div>
-                </div>
-              ))}
-              {isLive && streamDuration && (
-                <div className="statCard liveDuration">
-                  <span className="statIcon icon3">◷</span>
-                  <div>
-                    <small>YAYIN SÜRESİ</small>
-                    <b>{streamDuration}</b>
-                    <em>Şu anki yayın</em>
-                  </div>
-                </div>
-              )}
-            </div>
           </section>
 
           <section className="youtubeSection">
@@ -249,6 +227,36 @@ export default function Home() {
                 ))}
               </div>
             )}
+
+            <div className="youtubeStatsSection">
+              <div className="youtubeStatsHeading">
+                <span>YOUTUBE İSTATİSTİKLERİ</span>
+                <small>Kanal verileri otomatik güncellenir</small>
+              </div>
+
+            <div className="statsGrid youtubeStatsGrid">
+              {youtubeStats.map((stat, index) => (
+                <div className="statCard" key={stat.label}>
+                  <span className={`statIcon icon${index}`}>{stat.icon}</span>
+                  <div>
+                    <small>{stat.label}</small>
+                    <b>{stat.value}</b>
+                    <em>{stat.sub}</em>
+                  </div>
+                </div>
+              ))}
+              {isLive && streamDuration && (
+                <div className="statCard liveDuration">
+                  <span className="statIcon icon3">◷</span>
+                  <div>
+                    <small>YAYIN SÜRESİ</small>
+                    <b>{streamDuration}</b>
+                    <em>Şu anki yayın</em>
+                  </div>
+                </div>
+              )}
+            </div>
+            </div>
           </section>
 
           <footer className="footer">

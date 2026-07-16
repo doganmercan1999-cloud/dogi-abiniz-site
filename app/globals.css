@@ -431,3 +431,41 @@ a{color:inherit}
   .socialRow{position:relative}
 }
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+
+
+/* V8 - YouTube istatistikleri video bölümünün altında */
+.youtubeStatsSection{
+  margin-top:22px;
+  padding-top:18px;
+  border-top:1px solid rgba(255,255,255,.07);
+}
+.youtubeStatsHeading{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:12px;
+}
+.youtubeStatsHeading span{
+  color:#c15fff;
+  font-size:10px;
+  font-weight:900;
+  letter-spacing:.12em;
+}
+.youtubeStatsHeading small{
+  color:#8f8597;
+  font-size:11px;
+}
+.youtubeStatsGrid{
+  border:1px solid rgba(255,255,255,.07);
+  border-radius:16px;
+  overflow:hidden;
+  background:rgba(255,255,255,.02);
+}
+@media(max-width:700px){
+  .youtubeStatsHeading{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:5px;
+  }
+}
