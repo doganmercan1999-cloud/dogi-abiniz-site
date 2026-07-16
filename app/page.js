@@ -2,16 +2,20 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-const socials = [
+const SOCIALS = [
   { name: "Kick", handle: "@dogiabiniz", href: "https://kick.com/dogiabiniz", icon: "K", className: "kick" },
   { name: "YouTube", handle: "@dogiabi", href: "https://www.youtube.com/@dogiabi", icon: "▶", className: "youtube" },
-  { name: "Instagram", handle: "doganmercan7", href: "https://www.instagram.com/doganmercan7/", icon: "◎", className: "instagram" },
-  { name: "Discord", handle: "Yakında", href: "#", icon: "◖◗", className: "discord", disabled: true },
+  { name: "Instagram", handle: "@doganmercan7", href: "https://www.instagram.com/doganmercan7/", icon: "◎", className: "instagram" },
+  { name: "Discord", handle: "Topluluğumuza katıl", href: "#", icon: "◖◗", className: "discord", disabled: true },
   { name: "İletişim", handle: "dogiabiniz@gmail.com", href: "mailto:dogiabiniz@gmail.com", icon: "✉", className: "mail" }
 ];
 
 function formatNumber(value) {
-  return new Intl.NumberFormat("tr-TR", { notation: "compact", maximumFractionDigits: 1 }).format(value ?? 0);
+  if (value === null || value === undefined) return "—";
+  return new Intl.NumberFormat("tr-TR", {
+    notation: "compact",
+    maximumFractionDigits: 1
+  }).format(value);
 }
 
 function elapsed(startedAt) {
@@ -28,127 +32,234 @@ export default function Home() {
   const [clock, setClock] = useState(Date.now());
 
   useEffect(() => {
-    fetch("/api/kick").then((r) => r.json()).then(setKick).catch(() => setKick({ unavailable: true }));
-    fetch("/api/youtube").then((r) => r.json()).then(setYoutube).catch(() => setYoutube({ unavailable: true }));
+    const loadKick = () =>
+      fetch("/api/kick", { cache: "no-store" })
+        .then((r) => r.json())
+        .then(setKick)
+        .catch(() => setKick({ unavailable: true }));
 
-    const refreshKick = setInterval(() => {
-      fetch("/api/kick").then((r) => r.json()).then(setKick).catch(() => {});
-    }, 60000);
+    const loadYoutube = () =>
+      fetch("/api/youtube")
+        .then((r) => r.json())
+        .then(setYoutube)
+        .catch(() => setYoutube({ unavailable: true }));
 
-    const timer = setInterval(() => setClock(Date.now()), 60000);
+    loadKick();
+    loadYoutube();
+
+    const kickTimer = setInterval(loadKick, 60_000);
+    const clockTimer = setInterval(() => setClock(Date.now()), 60_000);
+
     return () => {
-      clearInterval(refreshKick);
-      clearInterval(timer);
+      clearInterval(kickTimer);
+      clearInterval(clockTimer);
     };
   }, []);
 
   useEffect(() => {
-    const move = (event) => {
-      document.documentElement.style.setProperty("--mx", `${event.clientX / innerWidth * 100}%`);
-      document.documentElement.style.setProperty("--my", `${event.clientY / innerHeight * 100}%`);
+    const move = (e) => {
+      document.documentElement.style.setProperty("--mx", `${e.clientX / innerWidth * 100}%`);
+      document.documentElement.style.setProperty("--my", `${e.clientY / innerHeight * 100}%`);
     };
     window.addEventListener("pointermove", move);
     return () => window.removeEventListener("pointermove", move);
   }, []);
 
-  const streamTime = useMemo(() => elapsed(kick?.startedAt), [kick?.startedAt, clock]);
+  const streamDuration = useMemo(() => elapsed(kick?.startedAt), [kick?.startedAt, clock]);
+  const isLive = Boolean(kick?.live);
+
+  const youtubeStats = youtube?.channel
+    ? [
+        { label: "TOPLAM ABONE", value: formatNumber(youtube.channel.subscribers), sub: "YouTube abonesi", icon: "♟" },
+        { label: "TOPLAM İZLENME", value: formatNumber(youtube.channel.views), sub: "Kanal izlenmesi", icon: "◉" },
+        { label: "VİDEO SAYISI", value: formatNumber(youtube.channel.videos), sub: "Yayınlanan video", icon: "▣" }
+      ]
+    : [
+        { label: "TOPLAM ABONE", value: "—", sub: "API bağlanınca görünür", icon: "♟" },
+        { label: "TOPLAM İZLENME", value: "—", sub: "API bağlanınca görünür", icon: "◉" },
+        { label: "VİDEO SAYISI", value: "—", sub: "API bağlanınca görünür", icon: "▣" }
+      ];
 
   return (
     <main className="page">
-      <div className="aurora" />
-      <div className="noise" />
+      <div className="scene" aria-hidden="true">
+        <div className="glow leftGlow" />
+        <div className="glow rightGlow" />
+        <div className="cursorLight" />
+        <div className="edgeBeam leftBeam" />
+        <div className="edgeBeam rightBeam" />
+      </div>
 
-      <section className="profileCard">
-        <header className="hero">
-          <div className="avatarRing">
-            <img src="/profil.png" alt="Dogi Abiniz profil fotoğrafı" />
+      <section className="dashboard">
+        <aside className="sidebar">
+          <div className="avatarZone">
+            <div className="avatarEnergy" />
+            <div className="avatarRing">
+              <img src="/profil.png" alt="Dogi Abiniz profil fotoğrafı" />
+            </div>
+            <span className="verified">✓</span>
           </div>
-          <div className="verified">✓</div>
-          <h1>Dogi <span>Abiniz</span></h1>
-          <p>Streamer &amp; Content Creator</p>
 
-          <div className={`mainStatus ${kick?.live ? "isLive" : ""}`}>
+          <div className="identity">
+            <h1>Dogi <span>Abiniz</span></h1>
+            <p>Streamer · Content Creator · Gamer</p>
+          </div>
+
+          <div className={`statusPill ${isLive ? "live" : ""}`}>
             <i />
-            {!kick ? "Yayın durumu kontrol ediliyor..." :
-             kick.live ? `${formatNumber(kick.viewers)} kişi şu an yayında` :
-             kick.unavailable ? "Yayın durumu geçici olarak alınamıyor" :
-             "Şu anda çevrimdışı"}
+            {isLive ? "Şu anda çevrimiçi!" : kick?.unavailable ? "Durum alınamadı" : "Şu anda çevrimdışı"}
           </div>
-        </header>
 
-        {kick?.live && (
-          <a className="streamPanel" href="https://kick.com/dogiabiniz" target="_blank" rel="noreferrer">
-            <div className="streamTop">
-              <span className="livePill"><i /> CANLI</span>
-              <span>{formatNumber(kick.viewers)} izleyici</span>
-              {streamTime && <span>{streamTime}</span>}
+          <nav className="socialList">
+            {SOCIALS.map((item) => (
+              <a
+                key={item.name}
+                href={item.href}
+                target={item.href.startsWith("http") ? "_blank" : undefined}
+                rel="noreferrer"
+                className={`socialRow ${item.className} ${item.disabled ? "disabled" : ""}`}
+                onClick={item.disabled ? (e) => e.preventDefault() : undefined}
+              >
+                <span className="socialIcon">{item.icon}</span>
+                <span className="socialInfo">
+                  <b>{item.name}</b>
+                  <small>{item.handle}</small>
+                </span>
+                {item.name === "Kick" && (
+                  <span className={`tinyState ${isLive ? "online" : ""}`}>
+                    <i /> {isLive ? "CANLI" : "OFFLINE"}
+                  </span>
+                )}
+                <span className="arrow">↗</span>
+              </a>
+            ))}
+          </nav>
+
+          <div className="sideActions">
+            <a href="mailto:dogiabiniz@gmail.com">♡ Destekle</a>
+            <span />
+            <a href="#links">Tüm linkler →</a>
+          </div>
+        </aside>
+
+        <section className="mainPanel">
+          <div className="topAction">
+            <a href="https://kick.com/dogiabiniz" target="_blank" rel="noreferrer">♡ Takip et</a>
+          </div>
+
+          <section className={`heroPanel ${isLive ? "isLive" : ""}`}>
+            <div className="heroKicker">
+              <span><i /> {isLive ? "CANLI YAYINDA" : "CANLI YAYIN"}</span>
             </div>
-            <h2>{kick.title || "Dogi Abiniz yayında"}</h2>
-            <p>{kick.category || "Canlı yayın"}</p>
-            <strong>Yayına git →</strong>
-          </a>
-        )}
 
-        <nav className="socials">
-          {socials.map((item) => (
-            <a
-              key={item.name}
-              className={`social ${item.className} ${item.disabled ? "disabled" : ""}`}
-              href={item.href}
-              target={item.href.startsWith("http") ? "_blank" : undefined}
-              rel="noreferrer"
-              onClick={item.disabled ? (e) => e.preventDefault() : undefined}
-            >
-              <span className="socialIcon">{item.icon}</span>
-              <span className="socialText"><b>{item.name}</b><small>{item.handle}</small></span>
-              {item.name === "Kick" && kick?.live && <span className="miniLive"><i /> CANLI</span>}
-              <span className="chevron">›</span>
-            </a>
-          ))}
-        </nav>
+            <div className="heroGrid">
+              <div className="kickOrbWrap">
+                <div className="kickOrbit one" />
+                <div className="kickOrbit two" />
+                <div className="kickOrb">K</div>
+              </div>
 
-        <section className="youtubeSection">
-          <div className="sectionHeading">
-            <div>
-              <span className="eyebrow">YOUTUBE</span>
-              <h2>Son videolar</h2>
+              <div className="heroCopy">
+                <span className="welcome">HOŞGELDİN!</span>
+                <h2>
+                  {isLive ? (
+                    <>Şu anda <strong>CANLI</strong> yayındayım!</>
+                  ) : (
+                    <>Şu anda <strong>çevrimdışı</strong></>
+                  )}
+                </h2>
+                <p>
+                  {isLive
+                    ? "Kick kanalımda yayındayım. Hemen katıl, sohbetin bir parçası ol!"
+                    : "Yayın açtığımda buradan anlık olarak takip edebilirsin. Bildirimleri açmayı unutma!"}
+                </p>
+
+                <div className="heroButtons">
+                  <a className="primaryButton" href="https://kick.com/dogiabiniz" target="_blank" rel="noreferrer">
+                    Kick kanalına git ↗
+                  </a>
+                  <button type="button" className="secondaryButton" onClick={() => alert("Tarayıcı bildirim özelliği sonraki sürümde eklenecek.")}>
+                    ♧ Bildirimleri aç
+                  </button>
+                </div>
+              </div>
+
+              {isLive && (
+                <div className="liveBadgeTop">
+                  <span>● LIVE</span>
+                  <b>{formatNumber(kick.viewers)}</b>
+                </div>
+              )}
             </div>
-            {youtube?.channel && (
-              <div className="channelStats">
-                <span><b>{formatNumber(youtube.channel.subscribers)}</b> abone</span>
-                <span><b>{formatNumber(youtube.channel.views)}</b> görüntülenme</span>
+
+            <div className="statsGrid">
+              {youtubeStats.map((stat, index) => (
+                <div className="statCard" key={stat.label}>
+                  <span className={`statIcon icon${index}`}>{stat.icon}</span>
+                  <div>
+                    <small>{stat.label}</small>
+                    <b>{stat.value}</b>
+                    <em>{stat.sub}</em>
+                  </div>
+                </div>
+              ))}
+              {isLive && streamDuration && (
+                <div className="statCard liveDuration">
+                  <span className="statIcon icon3">◷</span>
+                  <div>
+                    <small>YAYIN SÜRESİ</small>
+                    <b>{streamDuration}</b>
+                    <em>Şu anki yayın</em>
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+
+          <section className="youtubeSection">
+            <div className="sectionHead">
+              <div>
+                <span className="youtubeLabel">▣ YOUTUBE</span>
+                <h2>Son videolar</h2>
+              </div>
+              <a href="https://www.youtube.com/@dogiabi" target="_blank" rel="noreferrer">
+                YouTube kanalına git ↗
+              </a>
+            </div>
+
+            {!youtube ? (
+              <div className="notice">Videolar yükleniyor...</div>
+            ) : youtube.configured === false ? (
+              <div className="notice">
+                YouTube otomatik bağlantısı hazır. Vercel’e <b>YOUTUBE_API_KEY</b> eklenince son videolar burada görünecek.
+              </div>
+            ) : youtube.unavailable ? (
+              <div className="notice">YouTube verileri şu anda alınamıyor.</div>
+            ) : (
+              <div className="videoGrid">
+                {youtube.latestVideos?.map((video) => (
+                  <a key={video.id} href={video.url} target="_blank" rel="noreferrer" className="videoCard">
+                    <div className="thumb">
+                      <img src={video.thumbnail} alt="" />
+                      <span className="play">▶</span>
+                    </div>
+                    <h3>{video.title}</h3>
+                    <small>{new Date(video.publishedAt).toLocaleDateString("tr-TR")}</small>
+                  </a>
+                ))}
               </div>
             )}
-          </div>
+          </section>
 
-          {!youtube ? (
-            <div className="notice">Videolar yükleniyor...</div>
-          ) : youtube.configured === false ? (
-            <div className="notice">
-              YouTube otomatik bağlantısı hazır. Vercel’e <b>YOUTUBE_API_KEY</b> eklenince videolar burada otomatik görünecek.
+          <footer className="footer">
+            <span>© 2026 Dogi Abiniz. Tüm hakları saklıdır. 💜</span>
+            <div>
+              <b>♛</b>
+              <b>▣</b>
+              <b>♢</b>
             </div>
-          ) : youtube.unavailable ? (
-            <div className="notice">YouTube verileri şu anda alınamadı. Kanal bağlantısı çalışmaya devam ediyor.</div>
-          ) : (
-            <div className="videoGrid">
-              {youtube.latestVideos?.map((video) => (
-                <a className="video" href={video.url} target="_blank" rel="noreferrer" key={video.id}>
-                  <div className="thumb">
-                    <img src={video.thumbnail} alt="" />
-                    <span>▶</span>
-                  </div>
-                  <h3>{video.title}</h3>
-                  <small>{new Date(video.publishedAt).toLocaleDateString("tr-TR")}</small>
-                </a>
-              ))}
-            </div>
-          )}
+          </footer>
         </section>
-
-        <footer>
-          <span>♛</span>
-          <p>Her gün yayın ve yeni videolar!</p>
-        </footer>
       </section>
     </main>
   );

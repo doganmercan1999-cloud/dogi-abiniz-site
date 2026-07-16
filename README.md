@@ -1,4 +1,4 @@
-# Dogi Abiniz – Next.js V4
+# Dogi Abiniz – Next.js V7
 
 ## Özellikler
 
@@ -41,3 +41,29 @@ npm run dev
 Kick canlı verisi, Kick'in web sitesinde kullandığı herkese açık uç noktadan alınmaktadır.
 Kick bu uç noktayı değiştirirse yalnızca canlı durum kartı geçici olarak kapanır;
 sosyal bağlantılar ve YouTube bölümü çalışmaya devam eder.
+
+
+## V5
+- Premium üst ışık çizgisi
+- Geliştirilmiş neon ve cam görünümü
+- Daha akıcı kart ve video animasyonları
+- Mobil görünüm iyileştirmeleri
+
+
+## V6 büyük yeniden tasarım
+
+- Masaüstünde iki sütunlu yeni düzen
+- Sol tarafta profil ve sosyal bağlantılar
+- Sağ tarafta büyük Kick canlı/offline paneli
+- YouTube videoları için yeni kart düzeni
+- Mobilde tek sütuna dönüşen responsive yapı
+
+
+## V7 dashboard tasarımı
+
+- Mockup'a yakın neon dashboard düzeni
+- Büyük canlı/offline yayın paneli
+- Sol sabit profil ve sosyal alanı
+- YouTube video kartları
+- Kanal istatistik kartları
+- Geniş ekran ve mobil uyumluluk
