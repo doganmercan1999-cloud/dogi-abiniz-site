@@ -67,3 +67,4 @@ sosyal bağlantılar ve YouTube bölümü çalışmaya devam eder.
 - YouTube video kartları
 - Kanal istatistik kartları
 - Geniş ekran ve mobil uyumluluk
+Vercel Next.js deployment yenilemesi.
